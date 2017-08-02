@@ -1,27 +1,28 @@
+Dim fso,osh
 Set fso = CreateObject("Scripting.FileSystemObject")
+Set osh = CreateObject("WScript.Shell")
+
+If LCase(Right(WScript.FullName,11)) = "wscript.exe" Then
+    osh.run "cmd /c cscript.exe //nologo """ & WScript.ScriptFullName & """"
+    WScript.quit
+End If
+
 ParentPath = fso.GetParentFolderName(WScript.ScriptFullName)
 SubFolder = ParentPath & "\resource_Download_Temp"
 DstFolder = ParentPath & "\resource"
 If Not fso.FolderExists(SubFolder) Then fso.CreateFolder(SubFolder)
 
-file1 = "FastCopy.rc"
-WScript.Echo "Start download """ & file1 & """"
-Source = LoadWebPageSource("https://raw.githubusercontent.com/Mapaler/FastCopy-M/master/src/" & file1)
-If fso.FileExists(SubFolder & "\" & file1) Then fso.DeleteFile SubFolder & "\" & file1
-WriteFileBin Source,SubFolder & "\" & file1
-
-If fso.FileExists(SubFolder & "\" & file1) Then fso.CopyFile SubFolder & "\" & file1, DstFolder & "\" & file1, True
-
-file2 = "resource.h"
-WScript.Echo "Start download """ & file2 & """"
-Source = LoadWebPageSource("https://raw.githubusercontent.com/Mapaler/FastCopy-M/master/src/" & file2)
-If fso.FileExists(SubFolder & "\" & file2) Then fso.DeleteFile SubFolder & "\" & file2
-WriteFileBin Source,SubFolder & "\" & file2
-
-If fso.FileExists(SubFolder & "\" & file2) Then fso.CopyFile SubFolder & "\" & file2, DstFolder & "\" & file2, True
+files = Array("FastCopy.rc","resource.h")
+For i = LBound(files) To UBound(files)
+	url = "https://raw.githubusercontent.com/Mapaler/FastCopy-M/master/src/" & files(i)
+	WScript.Echo "Start download """ & files(i) & """" & vbCrLf & url1
+	Source = LoadWebPageSource(url)
+	If fso.FileExists(SubFolder & "\" & files(i)) Then fso.DeleteFile SubFolder & "\" & files(i)
+	WriteFileBin Source,SubFolder & "\" & files(i)
+	If fso.FileExists(SubFolder & "\" & files(i)) Then fso.CopyFile SubFolder & "\" & files(i), DstFolder & "\" & files(i), True
+Next
 
 WScript.Echo "Download over."
-
 
 '写入二进制文件函数
 Function WriteFileBin(bin,filePath)
