@@ -1,5 +1,4 @@
-# FastCopy-M Resources Rebuild & Replace Tools
-FastCopy-M 资源文件重编译/自动替换工具
+# FastCopy-M Resources Rebuild & Replace Tools<br>FastCopy-M 资源文件重编译/自动替换工具
 
 你可以用Visual Studio作为IDE修改资源，资源文件在“resource”文件夹里面。
 You can use Visual Studio for IDE to edit resources, resource files in "resource" folder.
@@ -12,4 +11,15 @@ If the resource file with this tool is too old, use "Update resources source fil
 
 有更多问题可以反馈
 Have more questions to feedback
-	https://github.com/Mapaler/FastCopy-M/issues
+	https://github.com/Mapaler/FastCopy-M/
+
+# Auto Change Icon Tools<br>自动更换图标工具
+
+在“My New Icon”文件夹内放入你的动画图标组，命名为“1.ico”、“2.ico”、“3.ico”……其中最后一个图标文件将作为等待图标。
+Put your customize icon animate group, and rename to "1.ico","2.ico","3.ico"... Attention: The final icon file as wait icon.
+
+然后将“FastCopy.exe”拖到“Change Icon.vbs”上即可。
+Then drag original "FastCopy.exe" and put on "Change Icon.vbs" . 
+
+会自动编译和替换资源，并保存到“output\FastCopy.exe”。
+Then will auto begin rebuild and replace resources.  And generate to "output\FastCopy.exe".
