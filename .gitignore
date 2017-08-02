@@ -1,0 +1,7 @@
+/output
+/resource_Download_Temp
+/tools/*.ini
+/tools/*.log
+/resource/FastCopy.rc
+/resource/resource.h
+/resource/icon/[1234567890].ico

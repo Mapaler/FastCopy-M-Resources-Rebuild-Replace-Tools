@@ -4,6 +4,7 @@ If "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
 ) Else (
 	Set architecture=x86
 )
+if not exist output md output
 REM 访问头文件 visit header files
 cd "%~dp0include"
 REM 编译资源 rebuild resource
