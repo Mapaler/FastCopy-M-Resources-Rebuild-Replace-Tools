@@ -17,6 +17,11 @@
 #pragma once
 #endif
 
+#if _MSC_VER >= 1200
+#pragma warning(push)
+#pragma warning(disable:4668) // #if not_defined treated as #if 0
+#endif
+
 #if !defined(_SAL_VERSION_SAL2) // [
 
  #if defined(__BUILDMACHINE__) || defined(_USE_SAL2_ONLY)
@@ -40,7 +45,7 @@
 #endif // ]
 
 /* Begin compatibility fixes required for Win8/VS2012 RTM sal.h */
-#ifndef _SAL_L_Source_ 
+#ifndef _SAL_L_Source_
 
 // Some annotations aren't officially SAL2 yet.
 #if _USE_ATTRIBUTES_FOR_SAL /*IFSTRIP=IGN*/
@@ -49,12 +54,13 @@
 #define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
 #endif
 
-#endif 
+#endif
 
 /* End compatibility fixes required for Win8/VS2012 RTM sal.h */
 
 #include <sal.h>
 
+/* This version symbol is deprecated in favor of __SAL_H_VER */
 #ifndef __SAL_H_FULL_VER
 #define __SAL_H_FULL_VER 140050727
 #endif
@@ -64,7 +70,7 @@ extern "C" {
 #endif
 
 /* version specific fixes to bring sal.h upto date */
-#if __SAL_H_FULL_VER <= 140050728 // [
+#if __SAL_H_FULL_VER <= 140050727 // [
 
 #if !defined(__midl) && defined(_PREFAST_) && _MSC_VER >= 1000 // [
 
@@ -245,6 +251,71 @@ __ANNOTATION(SAL_failureDefault(enum __SAL_failureKind));
 #define __inner_possibly_notnullterminated       _SAL_L_Source_(__inner_possibly_notnulltermiated, (),  _SA_annotes1(SAL_nullTerminated,__maybe))
 #endif // ]
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// Low Level Memory Correctness annotations
+// 
+// These are the implementation details for the Memory Correctness annotations
+// that support checking of kernel/user memory handling within kernel mode code.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// The enum that defines the types of memory context that exist in the system.
+//
+enum _SAL_ExecutionContext { SAL_KernelMode, SAL_UserMode };
+
+// 
+// temporary hack: Globals that stand in for the globally available SAL-pseudo-variables
+// _Current_execution_context_ and _Previous_execution_context_. NMM will need to be modified
+// to offer these.
+//
+enum _SAL_ExecutionContext _Previous_execution_context_;
+enum _SAL_ExecutionContext _Current_execution_context_;
+
+//
+// Annotation elements that support the memory origin concept.
+// The "When" variant is a hack for now until NMM can parse _Previous_execution_context_
+// and _Current_execution_context_
+//
+__ANNOTATION(SAL_MemoryOrigin(__In_impl_ enum _SAL_ExecutionContext);)
+__ANNOTATION(SAL_MemoryOriginWhen(__In_impl_ enum _SAL_ExecutionContext, __In_impl_ enum _SAL_ExecutionContext);)
+
+#define _Memory_origin_(context)    _SAL2_Source_(_Memory_origin_, (context), _SA_annotes1(SAL_MemoryOrigin, context))
+#define _Memory_origin_when_(previousContext, context)   _SAL2_Source_(_Memory_origin_when_, (previousContext, context), _SA_annotes2(SAL_MemoryOriginWhen, previousContext, context))
+
+
+// 
+// Annotation elements that support the memory accessibility concept.
+// The "When" variant is a hack for new until NMM can parse _Previous_execution_context_
+// and _Current_execution_context_
+//
+__ANNOTATION(SAL_AccessibleTo(__In_impl_ enum _SAL_ExecutionContext, __In_impl_ __int64 count);)
+__ANNOTATION(SAL_AccessibleToWhen(__In_impl_ enum _SAL_ExecutionContext, __In_impl_ enum _SAL_ExecutionContext, __In_impl_ __int64 count);)
+
+#define _Accessible_bytes_(context, expr)    _SAL2_Source_(_Accessible_bytes_, (context, expr), _SA_annotes2(SAL_AccessibleTo, context, expr))
+#define _Accessible_bytes_when_(previousContext, context, expr)   _SAL2_Source_(_Accessible_bytes_when_, (context, previousContext, expr), _SA_annotes3(SAL_AccessibleToWhen, context, previousContext, expr))
+#define _Pre_accessible_bytes_(context, expr)      _Pre_ _Accessible_bytes_(context, expr)
+#define _Pre_accessible_bytes_when_(context, previousContext, expr)   _Pre_ _Accessible_bytes_when_(context, previousContext, expr)
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// High Level Memory Correctness annotations
+//
+// These annotations form the expected interface for users to the Memory Correctness
+// annotations that support checking of kernel/user memory handling within
+// kernel mode code.
+// 
+///////////////////////////////////////////////////////////////////////////////
+#define _User_            _Memory_origin_when_(SAL_UserMode, SAL_UserMode) _Pre_accessible_bytes_when_(SAL_UserMode, SAL_KernelMode, 0)
+#define _User_on_(expr)   _When_((expr) != SAL_KernelMode, _User_always_)
+#define _User_always_     _Memory_origin_(SAL_UserMode) _Pre_accessible_bytes_(SAL_KernelMode, 0)
+#define _User_always_and_needs_probe_on_(mode)  _User_always_ _Pre_accessible_bytes_when_(SAL_UserMode, SAL_KernelMode, 0) _Pre_satisfies_(mode == _Previous_execution_context_)
+#define _Kernel_entry_              _SAL2_Source_(_Kernel_entry_, (), __inner_control_entrypoint(UserToKernel))
+#define _Kernel_entry_always_       _SAL2_Source_(_Kernel_entry_, (), __inner_control_entrypoint(UserToKernel)) _Pre_satisfies_(_Previous_execution_context_ == SAL_UserMode)
+
+
 #else // ][
 
 #define __file_parser(typ)
@@ -272,6 +343,38 @@ __ANNOTATION(SAL_failureDefault(enum __SAL_failureKind));
 #define __inner_volatile
 #define __inner_nonvolatile
 #define __inner_possibly_notnullterminated
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Low Level Memory Correctness annotations
+// 
+// These are the implementation details for the Memory Correctness annotations
+// that support checking of kernel/user memory handling within kernel mode code.
+//
+///////////////////////////////////////////////////////////////////////////////
+#define _Memory_origin_(context)
+#define _Memory_origin_when_(previousContext, context)
+#define _Accessible_bytes_(context, expr)    
+#define _Accessible_bytes_when_(previousContext, context, expr)
+#define _Pre_accessible_bytes_(context, expr)
+#define _Pre_accessible_bytes_when_(context, previousContext, expr)   
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// High Level Memory Correctness annotations
+//
+// These annotations form the expected interface for users to the Memory Correctness
+// annotations that support checking of kernel/user memory handling within
+// kernel mode code.
+// 
+///////////////////////////////////////////////////////////////////////////////
+#define _User_           
+#define _User_on_(expr)  
+#define _User_always_    
+#define _User_always_and_needs_probe_on_(mode)
+#define _Kernel_entry_              
+#define _Kernel_entry_always_
 
 #endif // ] // #if (_MSC_VER >= 1000) && !defined(__midl) && defined(_PREFAST_)
 
@@ -437,7 +540,7 @@ __inner_assume_bound_dec
 // A common pattern is to pass an "_Inout_ PCHAR* ppBuf" of size "_Inout_ DWORD* pSize"
 // to a function that writes to **pBuf, incrementing *ppBuf to point to one
 // past the last written byte. Thus the length of the write is
-// (*ppBuf - Old(*ppBuf)). The size of the remaining unwritten capacity 
+// (*ppBuf - Old(*ppBuf)). The size of the remaining unwritten capacity
 // is written to *pSize.
 //
 // This pattern is frequently used when progressively filling a
@@ -456,7 +559,7 @@ __inner_assume_bound_dec
                                 _At_(_Curr_, \
                                     _Pre_writable_size_(size) \
                                     _Post_writable_size_(size) \
-                                    _Post_satisfies_(_Curr_ - _Old_(_Curr_) == size)) \
+                                    _Post_satisfies_(_Curr_ - _Old_(_Curr_) == _Old_(size) - size)) \
                                 _At_(_Old_(_Curr_), \
                                     _Post_readable_size_(_Old_(size) - size)))
 #endif // ]
@@ -467,7 +570,7 @@ __inner_assume_bound_dec
                                 _At_(_Curr_, \
                                     _Pre_writable_byte_size_(size) \
                                     _Post_writable_byte_size_(size) \
-                                    _Post_satisfies_(((char*)_Curr_) - ((void*)_Old_(_Curr_)) == size)) \
+                                    _Post_satisfies_(((char*)_Curr_) - ((char*)_Old_(_Curr_)) == _Old_(size) - size)) \
                                 _At_(_Old_(_Curr_), \
                                     _Post_readable_byte_size_(_Old_(size) - size)))
 #endif // ]
@@ -479,7 +582,65 @@ __inner_assume_bound_dec
 // completely accurate approximation, but reasonable.
 //
 #define _Post_equals_last_error_     _SAL2_Source_(_Post_equals_last_error_, (),  _Post_satisfies_(_Curr_ != 0))
-                                
+
+//
+// Indicates the function simply translates the given Win32 error code into an HRESULT
+// with broadly the same semantics as HRESULT_FROM_WIN32().
+//
+// This convenience macro allows analyzers to understand the many bespoke error-translation
+// functions as simple translators that can be treated as equivalent to HRESULT_FROM_WIN32().
+// This results in fewer false positives and unnecessary path explorations. This is because
+// for analysis, the specific translations rarely matter, it is more important to know the
+// that function cannot fail and the conditions under which it will return an error-range
+// HRESULT and when a success-range HRESULT.
+//
+#ifndef _Translates_Win32_to_HRESULT_ // [
+
+#define _Translates_Win32_to_HRESULT_(errorCode)   \
+                                        _SAL2_Source_(_Translates_Win32_to_HRESULT_, (errorCode), \
+                                        _Always_( \
+                                        _When_((HRESULT)errorCode <= 0, \
+                                          _At_(_Curr_, _Post_equal_to_((HRESULT)errorCode))) \
+                                        _When_((HRESULT)errorCode > 0, \
+                                          _At_(_Curr_, _Post_equal_to_((HRESULT)((errorCode & 0x0000FFFF) | (FACILITY_WIN32 << 16) | 0x80000000))))))
+
+#endif // ]
+
+//
+// Indicates the function just directly translates the given NTSTATUS error code into an HRESULT.
+//
+// This convenience macro allows analyzers to understand the many bespoke error-translation
+// functions as simple translators that can be treated as equivalent to HRESULT_FROM_NT().
+// This results in fewer false positives and unnecessary path explorations. This is because
+// for analysis, the specific translations rarely matter.
+//
+#ifndef _Translates_NTSTATUS_to_HRESULT_    // [
+
+#define _Translates_NTSTATUS_to_HRESULT_(status)    \
+                                        _SAL2_Source_(_Translates_NTSTATUS_to_HRESULT_, (status), \
+                                        _Always_( \
+                                        _Post_equal_to_((HRESULT)(status | FACILITY_NT_BIT))))
+
+#endif // ]
+
+//
+// Indicates the funtion just translates the result of GetLastError() into an HRESULT.
+//
+// This convenience macro allows analyzers to understand the many bespoke GetLastError-translation
+// functions as simple translators that will always return a failure-value HRESULT (these functions
+// are almost never meant to be called when GetLastError() could return 0).
+// This results in fewer false positives and unnecessary path explorations. This is because
+// for analysis, the specific translations rarely matter.
+//
+#ifndef _Translates_last_error_to_HRESULT_ // [
+
+#define _Translates_last_error_to_HRESULT_          \
+                                        _SAL2_Source_(_Translates_last_error_to_HRESULT_, (), \
+                                        _Always_( \
+                                        _Post_satisfies_(_Curr_ < 0)))
+
+#endif // ]
+
 #ifdef  __cplusplus
 }
 #endif
@@ -540,12 +701,14 @@ void __pfx_assume(int, const char *);
  as VS11 is the minimum required for SAL 2 support.
 
  If we are in a downlevel environment, we can go ahead and include no_sal2.h
- to make all of SAL 2 no-ops to ensure no build failures. 
+ to make all of SAL 2 no-ops to ensure no build failures.
 */
 #if (!defined(_Outptr_) || _MSC_FULL_VER <= 160000000) && !( defined( MIDL_PASS ) || defined(__midl) || defined(RC_INVOKED) ) && !( defined( _SDV_ ) ) /*IFSTRIP=IGN*/ // [
 #include <no_sal2.h>
 #endif /* !defined(_Outptr_) || _MSC_VER <= 1600 */ // ]
 
+#if _MSC_VER >= 1200
+#pragma warning(pop)
+#endif
+
 #endif /* #ifndef SPECSTRINGS_H */  // ]
-
-

@@ -232,6 +232,25 @@ extern "C" {
 		_Analysis_mode_(_Analysis_operator_new_null_)
 
 
+    // Paging information:
+    //    _Analysis_assume_section_locked_(n)
+    //    _Analysis_assume_section_unlocked_(n)
+    //       A call will be made to <n>, and we should assume it is [not]
+    //       locked in memory.
+
+    // Past this point, the named section is assumed to be locked in
+    // memory, and calls to that section are deemed safe.
+    // This is only used when dynamically locked pages are being used.
+    __inline __nothrow
+    void __AnalysisAssumeLockedSection(__In_impl_ char *p);
+    __inline __nothrow
+    void __AnalysisAssumeUnlockedSection(__In_impl_ char *p);
+
+    #define _Analysis_assume_section_locked_(name)                        \
+		__AnalysisAssumeLockedSection(name)
+    #define _Analysis_assume_section_unlocked_(name)                      \
+		__AnalysisAssumeUnlockedSection(name)
+
 #else // ][
 
     #define __internal_kernel_driver
@@ -246,8 +265,16 @@ extern "C" {
     #define __prefast_operator_new_throws
     #define __prefast_operator_new_null
 
+    #define _Analysis_assume_section_locked_(name)
+    #define _Analysis_assume_section_unlocked_(name)
 
 #endif // ]
+
+    // Callback with high IRQL level will never actually be called above 
+    // 'level'
+    #define _IRQL_limited_to_(level)                                      \
+        ASSERT(KeGetCurrentIrql() <= level);                              \
+        _Analysis_assume_(KeGetCurrentIrql() <= level);
 
     // core macros: these provide syntatic wrappers to make other uses
     // simpler.
@@ -544,6 +571,13 @@ extern "C" {
     //
     #define _IRQL_uses_cancel_  /* see kernelspecs.h */
     #define __drv_useCancelIRQL _SAL1_1_Source_(__drv_usesCancelIRQL, (), _IRQL_uses_cancel_) /* legacy */
+
+    //
+    // The annotated parameter is an IRQL that will be restored and a new (probably the same)
+    // value will be inserted.  (Use this in preference to directly coding it.)
+    #undef _IRQL_inout_
+    #define _IRQL_inout_                                                      \
+        _IRQL_saves_ _IRQL_restores_
 
     // ---------------------------------------------------------------------
     // Specific function behaviors

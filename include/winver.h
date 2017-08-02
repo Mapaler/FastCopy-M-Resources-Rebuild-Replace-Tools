@@ -23,8 +23,8 @@
 extern "C" {
 #endif
 
-#pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#pragma region Desktop Family or OneCore Family
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM)
 
 #ifndef RC_INVOKED              /* RC doesn't need to see the rest of this */
 
@@ -61,6 +61,16 @@ VerFindFileW(
 #define VerFindFile  VerFindFileA
 #endif // !UNICODE
 
+#endif // RC_INVOKED
+
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM) */
+#pragma endregion
+
+#pragma region Desktop Family
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
+#ifndef RC_INVOKED
+
 DWORD
 APIENTRY
 VerInstallFileA(
@@ -90,6 +100,16 @@ VerInstallFileW(
 #else
 #define VerInstallFile  VerInstallFileA
 #endif // !UNICODE
+
+#endif // RC_INVOKED
+
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
+#pragma endregion
+
+#pragma region Desktop Family or OneCore Family
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM)
+
+#ifndef RC_INVOKED
 
 /* Returns size of version info in bytes */
 DWORD
@@ -159,6 +179,26 @@ BOOL APIENTRY GetFileVersionInfoExW(_In_ DWORD dwFlags,
 #define GetFileVersionInfoEx  GetFileVersionInfoExA
 #endif // !UNICODE
 
+#endif // RC_INVOKED
+
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM) */
+#pragma endregion
+
+#pragma region Desktop Family
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+
+#ifndef RC_INVOKED
+
+
+#endif  /* !RC_INVOKED */
+
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
+#pragma endregion
+
+#pragma region Desktop Family or OneCore Family
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM)
+
+#ifndef RC_INVOKED
 
 DWORD
 APIENTRY
@@ -205,7 +245,7 @@ VerQueryValueW(
 
 #endif  /* !RC_INVOKED */
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM) */
 #pragma endregion
 
 #ifdef __cplusplus

@@ -10,8 +10,8 @@
 *                                                                             *
 \*****************************************************************************/
 
-#pragma region Application Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#pragma region Application Family or OneCore Family
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM)
 
 /* ----- Symbols ----- */
 #define VS_FILE_INFO            RT_VERSION
@@ -84,11 +84,11 @@
 #define VFT2_FONT_VECTOR        0x00000002L
 #define VFT2_FONT_TRUETYPE      0x00000003L
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) */
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP | WINAPI_PARTITION_SYSTEM) */
 #pragma endregion
 
 #pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM)
 
 /* ----- VerFindFile() flags ----- */
 #define VFFF_ISSHAREDFILE       0x0001
@@ -167,6 +167,6 @@ typedef struct tagVS_FIXEDFILEINFO
 
 #endif  /* !RC_INVOKED */
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
+#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP | WINAPI_PARTITION_SYSTEM) */
 #pragma endregion
 

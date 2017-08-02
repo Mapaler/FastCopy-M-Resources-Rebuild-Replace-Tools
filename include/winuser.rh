@@ -75,8 +75,9 @@ Revision History:
 #endif /* _WIN32_WINNT >= 0x0500 */
 
 /*
- * 0x07 : unassigned
+ * 0x07 : reserved
  */
+
 
 #define VK_BACK           0x08
 #define VK_TAB            0x09
@@ -88,6 +89,10 @@ Revision History:
 #define VK_CLEAR          0x0C
 #define VK_RETURN         0x0D
 
+/*
+ * 0x0E - 0x0F : unassigned
+ */
+
 #define VK_SHIFT          0x10
 #define VK_CONTROL        0x11
 #define VK_MENU           0x12
@@ -97,10 +102,19 @@ Revision History:
 #define VK_KANA           0x15
 #define VK_HANGEUL        0x15  /* old name - should be here for compatibility */
 #define VK_HANGUL         0x15
+
+/*
+ * 0x16 : unassigned
+ */
+
 #define VK_JUNJA          0x17
 #define VK_FINAL          0x18
 #define VK_HANJA          0x19
 #define VK_KANJI          0x19
+
+/*
+ * 0x1A : unassigned
+ */
 
 #define VK_ESCAPE         0x1B
 
@@ -128,7 +142,7 @@ Revision History:
 
 /*
  * VK_0 - VK_9 are the same as ASCII '0' - '9' (0x30 - 0x39)
- * 0x40 : unassigned
+ * 0x3A - 0x40 : unassigned
  * VK_A - VK_Z are the same as ASCII 'A' - 'Z' (0x41 - 0x5A)
  */
 
@@ -183,9 +197,22 @@ Revision History:
 #define VK_F23            0x86
 #define VK_F24            0x87
 
+#if(_WIN32_WINNT >= 0x0604)
+
 /*
- * 0x88 - 0x8F : unassigned
+ * 0x88 - 0x8F : UI navigation
  */
+
+#define VK_NAVIGATION_VIEW     0x88 // reserved
+#define VK_NAVIGATION_MENU     0x89 // reserved
+#define VK_NAVIGATION_UP       0x8A // reserved
+#define VK_NAVIGATION_DOWN     0x8B // reserved
+#define VK_NAVIGATION_LEFT     0x8C // reserved
+#define VK_NAVIGATION_RIGHT    0x8D // reserved
+#define VK_NAVIGATION_ACCEPT   0x8E // reserved
+#define VK_NAVIGATION_CANCEL   0x8F // reserved
+
+#endif /* _WIN32_WINNT >= 0x0604 */
 
 #define VK_NUMLOCK        0x90
 #define VK_SCROLL         0x91
@@ -256,12 +283,42 @@ Revision History:
 #define VK_OEM_3          0xC0   // '`~' for US
 
 /*
- * 0xC1 - 0xD7 : reserved
+ * 0xC1 - 0xC2 : reserved
  */
 
+#if(_WIN32_WINNT >= 0x0604)
+
 /*
- * 0xD8 - 0xDA : unassigned
+ * 0xC3 - 0xDA : Gamepad input
  */
+
+#define VK_GAMEPAD_A                         0xC3 // reserved
+#define VK_GAMEPAD_B                         0xC4 // reserved
+#define VK_GAMEPAD_X                         0xC5 // reserved
+#define VK_GAMEPAD_Y                         0xC6 // reserved
+#define VK_GAMEPAD_RIGHT_SHOULDER            0xC7 // reserved
+#define VK_GAMEPAD_LEFT_SHOULDER             0xC8 // reserved
+#define VK_GAMEPAD_LEFT_TRIGGER              0xC9 // reserved
+#define VK_GAMEPAD_RIGHT_TRIGGER             0xCA // reserved
+#define VK_GAMEPAD_DPAD_UP                   0xCB // reserved
+#define VK_GAMEPAD_DPAD_DOWN                 0xCC // reserved
+#define VK_GAMEPAD_DPAD_LEFT                 0xCD // reserved
+#define VK_GAMEPAD_DPAD_RIGHT                0xCE // reserved
+#define VK_GAMEPAD_MENU                      0xCF // reserved
+#define VK_GAMEPAD_VIEW                      0xD0 // reserved
+#define VK_GAMEPAD_LEFT_THUMBSTICK_BUTTON    0xD1 // reserved
+#define VK_GAMEPAD_RIGHT_THUMBSTICK_BUTTON   0xD2 // reserved
+#define VK_GAMEPAD_LEFT_THUMBSTICK_UP        0xD3 // reserved
+#define VK_GAMEPAD_LEFT_THUMBSTICK_DOWN      0xD4 // reserved
+#define VK_GAMEPAD_LEFT_THUMBSTICK_RIGHT     0xD5 // reserved
+#define VK_GAMEPAD_LEFT_THUMBSTICK_LEFT      0xD6 // reserved
+#define VK_GAMEPAD_RIGHT_THUMBSTICK_UP       0xD7 // reserved
+#define VK_GAMEPAD_RIGHT_THUMBSTICK_DOWN     0xD8 // reserved
+#define VK_GAMEPAD_RIGHT_THUMBSTICK_RIGHT    0xD9 // reserved
+#define VK_GAMEPAD_RIGHT_THUMBSTICK_LEFT     0xDA // reserved
+
+#endif /* _WIN32_WINNT >= 0x0604 */
+
 
 #define VK_OEM_4          0xDB  //  '[{' for US
 #define VK_OEM_5          0xDC  //  '\|' for US
@@ -676,6 +733,9 @@ Revision History:
 #define WM_POINTERWHEEL                 0x024E
 #define WM_POINTERHWHEEL                0x024F
 #define DM_POINTERHITTEST               0x0250
+#define WM_POINTERROUTEDTO              0x0251
+#define WM_POINTERROUTEDAWAY            0x0252
+#define WM_POINTERROUTEDRELEASED        0x0253
 #endif /* WINVER >= 0x0602 */
 
 
@@ -771,7 +831,10 @@ Revision History:
 #endif /* WINVER >= 0x0600 */
 
 #if(WINVER >= 0x0400)
+#endif /* WINVER >= 0x0400 */
 
+
+#if(WINVER >= 0x0400)
 #define WM_HANDHELDFIRST                0x0358
 #define WM_HANDHELDLAST                 0x035F
 
@@ -1453,6 +1516,10 @@ Revision History:
 #define EM_SETIMESTATUS         0x00D8
 #define EM_GETIMESTATUS         0x00D9
 #endif /* WINVER >= 0x0500 */
+
+#if(WINVER >= 0x0604)
+#define EM_ENABLEFEATURE        0x00DA
+#endif /* WINVER >= 0x0604 */
 
 
 
