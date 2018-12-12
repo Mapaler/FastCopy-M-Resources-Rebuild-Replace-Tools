@@ -1,5 +1,8 @@
 # FastCopy-M Resources Rebuild & Replace Tools<br>FastCopy-M 资源文件重编译/自动替换工具
 
+目前版本仅适用于3.4.x及以前
+This version is only work for v3.4.x or before.
+
 当本工具自带资源文件版本过老时，使用“Update resources source file.vbs”可以自动从GitHub下载最新的“FastCopy.rc”和“resource.h”。第一次使用时也必须运行本工具。  
 If the resource file with this tool is too old, use "Update resources source file.vbs" to auto download the newest "FastCopy.rc" and "resource.h". And you must run this at first time use.
 
